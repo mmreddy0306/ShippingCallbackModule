@@ -1,15 +1,12 @@
-LABEL authors="mohan"
-# Use lightweight Java 17 image
+# ---------- BUILD STAGE ----------
+FROM eclipse-temurin:17-jdk AS build
+WORKDIR /build
+COPY . .
+RUN ./mvnw clean package -DskipTests
+
+# ---------- RUNTIME STAGE ----------
 FROM eclipse-temurin:17-jre
-
-# Set working directory
 WORKDIR /app
-
-# Copy the built jar
-COPY target/*.jar app.jar
-
-# Expose port (Render uses PORT env var)
+COPY --from=build /build/target/*.jar app.jar
 EXPOSE 8080
-
-# Start the app
 ENTRYPOINT ["java","-jar","app.jar"]
